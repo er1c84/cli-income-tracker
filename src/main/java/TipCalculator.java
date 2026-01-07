@@ -24,28 +24,55 @@ public class TipCalculator {
 
         try (Scanner scanner = new Scanner(System.in)) {
             while (true) {
-                System.out.println("\n========== Tip Calculator ==========");
+    printMenu();
+
+    System.out.print("Choose an option (1-5): ");
+    String input = scanner.nextLine().trim().toLowerCase();
+
+    switch (input) {
+        case "1", "log" -> logShift(scanner);
+
+        case "2", "summary" -> monthlySummary(scanner);
+
+        case "3", "list" -> listShifts(scanner);
+
+        case "4", "delete", "del" -> deleteShiftByDateFlow(scanner);
+
+        case "5", "exit", "quit", "q" -> {
+            System.out.println("Goodbye!");
+            return;
+        }
+
+        case "help", "h", "?" -> printHelp();
+
+        default -> System.out.println(
+            "Invalid option. Please enter 1-5 or type: log, summary, list, delete, help, exit."
+        );
+    }
+}
+        }
+    }
+
+    //print main menu 
+    private static void printMenu() {
+        System.out.println("\n========== Tip Calculator ==========");
                 System.out.println("1. Log a shift (save to database)");
                 System.out.println("2. Monthly summary (avg $/hr)");
                 System.out.println("3. List shifts for a month");
                 System.out.println("4. Delete a shift (by date) ");
                 System.out.println("5. Exit");
-                System.out.print("Choose an option (1-5): ");
+                System.out.print("Commands: log, summary, list, delete, help, exit\n");
+    }
 
-                String choice = scanner.nextLine().trim();
-                switch (choice) {
-                    case "1" -> logShift(scanner);
-                    case "2" -> monthlySummary(scanner);
-                    case "3" -> listShifts(scanner);
-                    case "4" -> deleteShiftByDateFlow(scanner);
-                    case "5" -> {
-                        System.out.println("Goodbye!");
-                        return;
-                    }
-                    default -> System.out.println("Invalid option. Please enter 1-4.");
-                }
-            }
-        }
+    //help menu 
+     private static void printHelp() {
+        System.out.println("\n=================== Help ===================");
+        System.out.println("You can select options by number or by typing commands:");
+        System.out.println("  log       -> Log a shift");
+        System.out.println("  summary   -> Monthly summary");
+        System.out.println("  list      -> List shifts for a month");
+        System.out.println("  delete    -> Delete all shifts on a date");
+        System.out.println("  exit      -> Quit the program");
     }
 
     //option 1: log shift 
