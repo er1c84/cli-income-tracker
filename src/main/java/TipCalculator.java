@@ -1,4 +1,9 @@
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -23,15 +28,17 @@ public class TipCalculator {
                 System.out.println("1. Log a shift (save to database)");
                 System.out.println("2. Monthly summary (avg $/hr)");
                 System.out.println("3. List shifts for a month");
-                System.out.println("4. Exit");
-                System.out.print("Choose an option (1-4): ");
+                System.out.println("4. Delete a shift (by date) ");
+                System.out.println("5. Exit");
+                System.out.print("Choose an option (1-5): ");
 
                 String choice = scanner.nextLine().trim();
                 switch (choice) {
                     case "1" -> logShift(scanner);
                     case "2" -> monthlySummary(scanner);
                     case "3" -> listShifts(scanner);
-                    case "4" -> {
+                    case "4" -> deleteShiftByDateFlow(scanner);
+                    case "5" -> {
                         System.out.println("Goodbye!");
                         return;
                     }
@@ -41,7 +48,7 @@ public class TipCalculator {
         }
     }
 
-    // ---------- OPTION 1: LOG SHIFT ----------
+    //option 1: log shift 
 
     private static void logShift(Scanner scanner) {
         int roleChoice = readIntInRange(scanner,
@@ -73,7 +80,7 @@ public class TipCalculator {
         System.out.println("Earnings Per Hour: " + currency.format(earningsPerHour));
     }
 
-    // ---------- OPTION 2: MONTHLY SUMMARY ----------
+    //option 2: monthly summary 
 
     private static void monthlySummary(Scanner scanner) {
         YearMonth ym = readYearMonth(scanner, "Enter month (YYYY-MM): ");
@@ -96,14 +103,28 @@ public class TipCalculator {
         }
     }
 
-    // ---------- OPTION 3: LIST SHIFTS ----------
+    //option 3: list shifts 
 
     private static void listShifts(Scanner scanner) {
         YearMonth ym = readYearMonth(scanner, "Enter month (YYYY-MM): ");
         listShiftsForMonth(ym);
     }
 
-    // ---------- DATABASE SETUP ----------
+    //option 4: delete shift by id
+  
+    private static void deleteShiftByDateFlow(Scanner scanner) {
+        LocalDate date = readDate(scanner, "Enter shift date to delete (YYYY-MM-DD): ");
+
+    int rowsDeleted = deleteShiftsByDate(date);
+
+    if (rowsDeleted > 0) {
+        System.out.println("Deleted " + rowsDeleted + " shift(s) on " + date + ".");
+    } else {
+        System.out.println("No shifts found on " + date + ".");
+    }
+}
+
+    //database set up
 
     private static void initDatabase() {
         String createTableSql = """
@@ -147,6 +168,21 @@ public class TipCalculator {
         }
     }
 
+    //delete shift by date 
+   private static int deleteShiftsByDate(LocalDate date) {
+    String sql = "DELETE FROM shifts WHERE shift_date = ?;";
+
+    try (Connection conn = DriverManager.getConnection(DB_URL);
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, date.toString());
+        return ps.executeUpdate(); // number of rows deleted
+
+    } catch (SQLException e) {
+        System.out.println("Failed to delete shifts: " + e.getMessage());
+        return 0;
+    }
+}
     private static MonthlySummary getMonthlySummary(YearMonth ym) {
         String start = ym.atDay(1).toString();
         String end = ym.atEndOfMonth().toString();
@@ -240,7 +276,7 @@ public class TipCalculator {
         }
     }
 
-    // ---------- INPUT HELPERS ----------
+    // input helpers 
 
     private static int readIntInRange(Scanner scanner, String prompt, int min, int max) {
         while (true) {
