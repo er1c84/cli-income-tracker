@@ -55,7 +55,7 @@ public class TipCalculator {
 
     //print main menu 
     private static void printMenu() {
-        System.out.println("\n========== Tip Calculator ==========");
+        System.out.println("\n=================== Tip Calculator ===================");
                 System.out.println("1. Log a shift (save to database)");
                 System.out.println("2. Monthly summary (avg $/hr)");
                 System.out.println("3. List shifts for a month");
