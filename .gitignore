@@ -1,0 +1,7 @@
+# Maven build output
+target/
+
+# Local SQLite database
+*.db
+
+
