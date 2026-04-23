@@ -1,4 +1,5 @@
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -6,12 +7,17 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -21,6 +27,8 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -37,6 +45,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
 import java.util.List;
@@ -58,6 +67,11 @@ public class TipCalculatorFx extends Application {
     private final NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.US);
 
     private Button activeNavButton;
+    private Button logNavButton;
+    private Button summaryNavButton;
+    private Button shiftsNavButton;
+    private Button deleteNavButton;
+    private Button helpNavButton;
 
     @Override
     public void start(Stage stage) {
@@ -75,9 +89,9 @@ public class TipCalculatorFx extends Application {
         Scene scene = new Scene(root, 1020, 680);
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/app.css")).toExternalForm());
 
-        stage.setTitle("Baoding Tip Calculator");
-        stage.setMinWidth(900);
-        stage.setMinHeight(600);
+        stage.setTitle("Wage Calculator");
+        stage.setMinWidth(680);
+        stage.setMinHeight(520);
         stage.setScene(scene);
         stage.show();
 
@@ -88,20 +102,20 @@ public class TipCalculatorFx extends Application {
         Label brand = new Label("Tip Calculator");
         brand.getStyleClass().add("brand-title");
 
-        Label subtitle = new Label("Baoding shift tracker");
+        Label subtitle = new Label("Wage Tracker");
         subtitle.getStyleClass().add("brand-subtitle");
 
-        Button logButton = navButton("Log Shift");
-        Button summaryButton = navButton("Monthly Summary");
-        Button shiftsButton = navButton("Shift History");
-        Button deleteButton = navButton("Delete Shifts");
-        Button helpButton = navButton("Help");
+        logNavButton = navButton("Log Shift");
+        summaryNavButton = navButton("Monthly Summary");
+        shiftsNavButton = navButton("Shift History");
+        deleteNavButton = navButton("Delete Shifts");
+        helpNavButton = navButton("Help");
 
-        logButton.setOnAction(e -> showLogShiftView());
-        summaryButton.setOnAction(e -> showMonthlySummaryView());
-        shiftsButton.setOnAction(e -> showShiftHistoryView());
-        deleteButton.setOnAction(e -> showDeleteView());
-        helpButton.setOnAction(e -> showHelpView());
+        logNavButton.setOnAction(e -> showLogShiftView());
+        summaryNavButton.setOnAction(e -> showMonthlySummaryView());
+        shiftsNavButton.setOnAction(e -> showShiftHistoryView());
+        deleteNavButton.setOnAction(e -> showDeleteView());
+        helpNavButton.setOnAction(e -> showHelpView());
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
@@ -109,14 +123,17 @@ public class TipCalculatorFx extends Application {
         Label footer = new Label("SQLite data saved locally");
         footer.getStyleClass().add("sidebar-footer");
 
-        VBox sidebar = new VBox(10, brand, subtitle, gap(12), logButton, summaryButton, shiftsButton, deleteButton, helpButton, spacer, footer);
+        VBox sidebar = new VBox(10, brand, subtitle, gap(12), logNavButton, summaryNavButton, shiftsNavButton, deleteNavButton, helpNavButton, spacer, footer);
         sidebar.getStyleClass().add("sidebar");
         sidebar.setPrefWidth(230);
+        sidebar.setMinWidth(190);
         return sidebar;
     }
 
     private BorderPane buildMainArea() {
         pageTitle.getStyleClass().add("page-title");
+        pageTitle.setMinWidth(0);
+        pageTitle.setWrapText(true);
 
         statusLabel.getStyleClass().add("status-pill");
         statusLabel.setMinWidth(Region.USE_PREF_SIZE);
@@ -127,9 +144,15 @@ public class TipCalculatorFx extends Application {
 
         content.getStyleClass().add("content-host");
 
+        ScrollPane scrollPane = new ScrollPane(content);
+        scrollPane.getStyleClass().add("content-scroll");
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
         BorderPane main = new BorderPane();
         main.setTop(topBar);
-        main.setCenter(content);
+        main.setCenter(scrollPane);
         return main;
     }
 
@@ -153,7 +176,7 @@ public class TipCalculatorFx extends Application {
 
     private void showLogShiftView() {
         pageTitle.setText("Log Shift");
-        activate((Button) ((VBox) ((BorderPane) content.getScene().getRoot()).getLeft()).getChildren().get(3));
+        activate(logNavButton);
 
         DatePicker datePicker = new DatePicker(LocalDate.now());
         datePicker.setMaxWidth(Double.MAX_VALUE);
@@ -252,6 +275,7 @@ public class TipCalculatorFx extends Application {
 
         GridPane form = new GridPane();
         form.getStyleClass().add("form-grid");
+        configureFormGrid(form);
         form.add(fieldLabel("Date"), 0, 0);
         form.add(datePicker, 1, 0);
         form.add(fieldLabel("Role"), 0, 1);
@@ -261,39 +285,33 @@ public class TipCalculatorFx extends Application {
         form.add(hoursField, 1, 3);
         form.add(fieldLabel("Tips"), 0, 4);
         form.add(tipsField, 1, 4);
+        makeGridFieldsGrow(datePicker, rolePicker, hoursField, tipsField);
 
-        HBox actions = new HBox(10, saveButton, clearButton);
-        actions.setAlignment(Pos.CENTER_LEFT);
+        FlowPane actions = actionRow(saveButton, clearButton);
 
         VBox formPanel = panel("New Shift", "Add a shift with the correct role, wage, hours, and tips.", form, estimateLabel, actions);
         VBox summaryPanel = panel("This Month", "A quick read on the current month after each saved shift.", snapshotMetrics);
 
-        HBox layout = new HBox(18, formPanel, summaryPanel);
-        layout.getStyleClass().add("two-column");
-        HBox.setHgrow(formPanel, Priority.ALWAYS);
-        HBox.setHgrow(summaryPanel, Priority.ALWAYS);
-
-        setContent(layout);
+        setContent(responsiveColumns(formPanel, summaryPanel));
     }
 
     private void showMonthlySummaryView() {
         pageTitle.setText("Monthly Summary");
-        activate((Button) ((VBox) ((BorderPane) content.getScene().getRoot()).getLeft()).getChildren().get(4));
+        activate(summaryNavButton);
 
-        DatePicker monthPicker = new DatePicker(LocalDate.now());
+        MonthYearPicker monthPicker = monthYearPicker(YearMonth.now());
         Button loadButton = primaryButton("Load Summary");
 
         VBox metrics = new VBox(12);
         metrics.getStyleClass().add("metrics-grid");
 
         Runnable loadSummary = () -> {
-            LocalDate date = monthPicker.getValue();
-            if (date == null) {
-                showError("Pick any date in the month you want to view.");
+            YearMonth ym = monthPicker.getValue();
+            if (ym == null) {
+                showError("Pick a month and year to view.");
                 return;
             }
 
-            YearMonth ym = YearMonth.from(date);
             MonthlySummary summary = getMonthlySummary(ym);
             metrics.getChildren().setAll(summaryCards(ym, summary));
             setStatus("Loaded " + ym);
@@ -301,19 +319,18 @@ public class TipCalculatorFx extends Application {
 
         loadButton.setOnAction(e -> loadSummary.run());
 
-        HBox controls = new HBox(10, fieldLabel("Month"), monthPicker, loadButton);
-        controls.setAlignment(Pos.CENTER_LEFT);
+        FlowPane controls = actionRow(fieldLabel("Month"), monthPicker, loadButton);
 
-        VBox panel = panel("Month Totals", "Pick any day in the month to see totals and average hourly earnings.", controls, metrics);
+        VBox panel = panel("Month Totals", "Pick a month and year to see totals and average hourly earnings.", controls, metrics);
         setContent(panel);
         loadSummary.run();
     }
 
     private void showShiftHistoryView() {
         pageTitle.setText("Shift History");
-        activate((Button) ((VBox) ((BorderPane) content.getScene().getRoot()).getLeft()).getChildren().get(5));
+        activate(shiftsNavButton);
 
-        DatePicker monthPicker = new DatePicker(LocalDate.now());
+        MonthYearPicker monthPicker = monthYearPicker(YearMonth.now());
         Button loadButton = primaryButton("Load Shifts");
         Button deleteSelectedButton = dangerButton("Delete Selected");
         deleteSelectedButton.setTooltip(new Tooltip("Deletes the selected table row"));
@@ -322,13 +339,12 @@ public class TipCalculatorFx extends Application {
         table.setItems(shiftRows);
 
         Runnable loadRows = () -> {
-            LocalDate date = monthPicker.getValue();
-            if (date == null) {
-                showError("Pick any date in the month you want to view.");
+            YearMonth ym = monthPicker.getValue();
+            if (ym == null) {
+                showError("Pick a month and year to view.");
                 return;
             }
 
-            YearMonth ym = YearMonth.from(date);
             shiftRows.setAll(fetchShiftsForMonth(ym));
             setStatus("Loaded " + shiftRows.size() + " shift(s)");
         };
@@ -353,8 +369,7 @@ public class TipCalculatorFx extends Application {
             }
         });
 
-        HBox controls = new HBox(10, fieldLabel("Month"), monthPicker, loadButton, deleteSelectedButton);
-        controls.setAlignment(Pos.CENTER_LEFT);
+        FlowPane controls = actionRow(fieldLabel("Month"), monthPicker, loadButton, deleteSelectedButton);
 
         VBox panel = panel("Saved Shifts", "Review shifts for a month, then select a row to delete only that entry.", controls, table);
         VBox.setVgrow(table, Priority.ALWAYS);
@@ -364,7 +379,7 @@ public class TipCalculatorFx extends Application {
 
     private void showDeleteView() {
         pageTitle.setText("Delete Shifts");
-        activate((Button) ((VBox) ((BorderPane) content.getScene().getRoot()).getLeft()).getChildren().get(6));
+        activate(deleteNavButton);
 
         DatePicker datePicker = new DatePicker(LocalDate.now());
         Button deleteButton = dangerButton("Delete Date");
@@ -393,8 +408,7 @@ public class TipCalculatorFx extends Application {
             setStatus("Delete complete");
         });
 
-        HBox controls = new HBox(10, fieldLabel("Date"), datePicker, deleteButton);
-        controls.setAlignment(Pos.CENTER_LEFT);
+        FlowPane controls = actionRow(fieldLabel("Date"), datePicker, deleteButton);
 
         VBox panel = panel("Delete by Date", "Use this when a whole date was entered incorrectly.", controls, result);
         setContent(panel);
@@ -402,7 +416,7 @@ public class TipCalculatorFx extends Application {
 
     private void showHelpView() {
         pageTitle.setText("Help");
-        activate((Button) ((VBox) ((BorderPane) content.getScene().getRoot()).getLeft()).getChildren().get(7));
+        activate(helpNavButton);
 
         VBox rates = new VBox(
             8,
@@ -419,9 +433,10 @@ public class TipCalculatorFx extends Application {
             detailRow("Delete Shifts", "Delete every shift on a selected date.")
         );
 
-        HBox layout = new HBox(18, panel("Pay Rules", "Current role rates used by the calculator.", rates), panel("Where Things Are", "Quick map of the app buttons.", workflow));
-        layout.getStyleClass().add("two-column");
-        setContent(layout);
+        setContent(responsiveColumns(
+            panel("Pay Rules", "Current role rates used by the calculator.", rates),
+            panel("Where Things Are", "Quick map of the app buttons.", workflow)
+        ));
     }
 
     private ToggleButton roleButton(String label, String role, ToggleGroup group) {
@@ -450,6 +465,7 @@ public class TipCalculatorFx extends Application {
         TableView<ShiftRow> table = new TableView<>();
         table.getStyleClass().add("shift-table");
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+        table.setMinHeight(280);
 
         TableColumn<ShiftRow, String> date = new TableColumn<>("Date");
         date.setCellValueFactory(new PropertyValueFactory<>("date"));
@@ -498,7 +514,7 @@ public class TipCalculatorFx extends Application {
         };
     }
 
-    private VBox panel(String title, String subtitle, javafx.scene.Node... children) {
+    private VBox panel(String title, String subtitle, Node... children) {
         Label titleLabel = new Label(title);
         titleLabel.getStyleClass().add("panel-title");
 
@@ -509,6 +525,8 @@ public class TipCalculatorFx extends Application {
         VBox panel = new VBox(14, titleLabel, subtitleLabel);
         panel.getChildren().addAll(children);
         panel.getStyleClass().add("panel");
+        panel.setMinWidth(0);
+        panel.setMaxWidth(Double.MAX_VALUE);
         VBox.setVgrow(panel, Priority.ALWAYS);
         return panel;
     }
@@ -522,6 +540,7 @@ public class TipCalculatorFx extends Application {
 
         VBox card = new VBox(4, valueLabel, labelLabel);
         card.getStyleClass().add("metric-card");
+        card.setMaxWidth(Double.MAX_VALUE);
         return card;
     }
 
@@ -566,6 +585,96 @@ public class TipCalculatorFx extends Application {
         return button;
     }
 
+    private FlowPane actionRow(Node... children) {
+        FlowPane row = new FlowPane(10, 10, children);
+        row.getStyleClass().add("action-row");
+        row.setAlignment(Pos.CENTER_LEFT);
+        return row;
+    }
+
+    private GridPane responsiveColumns(Node... children) {
+        GridPane columns = new GridPane();
+        columns.getStyleClass().add("responsive-columns");
+        columns.setHgap(18);
+        columns.setVgap(18);
+
+        Runnable relayout = () -> {
+            double width = columns.getWidth();
+            boolean stacked = width > 0 && width < 920;
+
+            columns.getChildren().clear();
+            columns.getColumnConstraints().clear();
+
+            if (stacked || children.length == 1) {
+                ColumnConstraints full = new ColumnConstraints();
+                full.setPercentWidth(100);
+                full.setHgrow(Priority.ALWAYS);
+                full.setFillWidth(true);
+                columns.getColumnConstraints().add(full);
+
+                for (int i = 0; i < children.length; i++) {
+                    Node child = children[i];
+                    columns.add(child, 0, i);
+                    GridPane.setHgrow(child, Priority.ALWAYS);
+                    GridPane.setVgrow(child, Priority.ALWAYS);
+                    if (child instanceof Region region) {
+                        region.setMaxWidth(Double.MAX_VALUE);
+                    }
+                }
+                return;
+            }
+
+            ColumnConstraints first = new ColumnConstraints();
+            first.setPercentWidth(50);
+            first.setHgrow(Priority.ALWAYS);
+            first.setFillWidth(true);
+
+            ColumnConstraints second = new ColumnConstraints();
+            second.setPercentWidth(50);
+            second.setHgrow(Priority.ALWAYS);
+            second.setFillWidth(true);
+
+            columns.getColumnConstraints().addAll(first, second);
+
+            for (int i = 0; i < children.length; i++) {
+                Node child = children[i];
+                int column = i % 2;
+                int row = i / 2;
+                columns.add(child, column, row);
+                GridPane.setHgrow(child, Priority.ALWAYS);
+                GridPane.setVgrow(child, Priority.ALWAYS);
+                if (child instanceof Region region) {
+                    region.setMaxWidth(Double.MAX_VALUE);
+                }
+            }
+        };
+
+        columns.widthProperty().addListener((obs, oldWidth, newWidth) -> relayout.run());
+        Platform.runLater(relayout);
+        return columns;
+    }
+
+    private void configureFormGrid(GridPane form) {
+        ColumnConstraints labels = new ColumnConstraints();
+        labels.setMinWidth(96);
+        labels.setPrefWidth(118);
+
+        ColumnConstraints fields = new ColumnConstraints();
+        fields.setHgrow(Priority.ALWAYS);
+        fields.setFillWidth(true);
+
+        form.getColumnConstraints().setAll(labels, fields);
+    }
+
+    private void makeGridFieldsGrow(Node... nodes) {
+        for (Node node : nodes) {
+            GridPane.setHgrow(node, Priority.ALWAYS);
+            if (node instanceof Region region) {
+                region.setMaxWidth(Double.MAX_VALUE);
+            }
+        }
+    }
+
     private Region gap(double height) {
         Region gap = new Region();
         gap.setMinHeight(height);
@@ -579,9 +688,17 @@ public class TipCalculatorFx extends Application {
         return spacer;
     }
 
-    private void setContent(javafx.scene.Node node) {
+    private void setContent(Node node) {
         content.getChildren().setAll(node);
-        StackPane.setMargin(node, new Insets(24));
+        StackPane.setAlignment(node, Pos.TOP_LEFT);
+        StackPane.setMargin(node, new Insets(20));
+        if (node instanceof Region region) {
+            region.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        }
+    }
+
+    private MonthYearPicker monthYearPicker(YearMonth initialValue) {
+        return new MonthYearPicker(initialValue);
     }
 
     private void setStatus(String message) {
@@ -769,6 +886,51 @@ public class TipCalculatorFx extends Application {
 
     private static String round2(double value) {
         return String.format("%.2f", value);
+    }
+
+    private static class MonthYearPicker extends HBox {
+        private final ComboBox<Month> monthBox = new ComboBox<>();
+        private final Spinner<Integer> yearSpinner;
+
+        private MonthYearPicker(YearMonth initialValue) {
+            super(10);
+            getStyleClass().add("month-year-picker");
+            setAlignment(Pos.CENTER_LEFT);
+
+            monthBox.setItems(FXCollections.observableArrayList(Month.values()));
+            monthBox.setButtonCell(new javafx.scene.control.ListCell<>() {
+                @Override
+                protected void updateItem(Month item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? null : item.getDisplayName(TextStyle.FULL, Locale.US));
+                }
+            });
+            monthBox.setCellFactory(listView -> new javafx.scene.control.ListCell<>() {
+                @Override
+                protected void updateItem(Month item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? null : item.getDisplayName(TextStyle.FULL, Locale.US));
+                }
+            });
+
+            int currentYear = LocalDate.now().getYear();
+            yearSpinner = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(currentYear - 10, currentYear + 10, initialValue.getYear()));
+            yearSpinner.setEditable(true);
+
+            monthBox.getSelectionModel().select(initialValue.getMonth());
+
+            getChildren().addAll(monthBox, yearSpinner);
+            HBox.setHgrow(monthBox, Priority.ALWAYS);
+        }
+
+        private YearMonth getValue() {
+            Month month = monthBox.getValue();
+            Integer year = yearSpinner.getValue();
+            if (month == null || year == null) {
+                return null;
+            }
+            return YearMonth.of(year, month);
+        }
     }
 
     private static class MonthlySummary {

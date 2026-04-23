@@ -65,8 +65,26 @@
     -fx-background-color: #f4f1ea;
 }
 
-.two-column {
+.content-scroll,
+.content-scroll > .viewport {
+    -fx-background-color: #f4f1ea;
+}
+
+.content-scroll {
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.responsive-columns {
     -fx-alignment: top-left;
+}
+
+.action-row {
+    -fx-alignment: center-left;
+}
+
+.month-year-picker {
+    -fx-alignment: center-left;
 }
 
 .panel {
@@ -112,9 +130,33 @@
     -fx-padding: 9 10;
 }
 
+.date-picker {
+    -fx-min-width: 150;
+}
+
+.combo-box,
+.spinner,
+.spinner .text-field {
+    -fx-background-color: #fbfaf6;
+    -fx-background-radius: 7;
+    -fx-border-radius: 7;
+    -fx-border-color: #cfc7b8;
+}
+
+.combo-box {
+    -fx-min-width: 170;
+}
+
+.spinner {
+    -fx-min-width: 110;
+}
+
 .text-field:focused,
 .date-picker:focused,
-.date-picker .text-field:focused {
+.date-picker .text-field:focused,
+.combo-box:focused,
+.spinner:focused,
+.spinner .text-field:focused {
     -fx-border-color: #397b67;
 }
 
@@ -142,6 +184,7 @@
     -fx-padding: 10 16;
     -fx-font-weight: 800;
     -fx-cursor: hand;
+    -fx-min-height: 40;
 }
 
 .primary-button {
