@@ -1,0 +1,234 @@
+.app-root {
+    -fx-background-color: #f4f1ea;
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-font-size: 14px;
+}
+
+.sidebar {
+    -fx-background-color: #173d36;
+    -fx-padding: 28 18;
+}
+
+.brand-title {
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: 800;
+}
+
+.brand-subtitle,
+.sidebar-footer {
+    -fx-text-fill: #b9d4cd;
+    -fx-font-size: 12px;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #e7f2ef;
+    -fx-alignment: center-left;
+    -fx-padding: 12 14;
+    -fx-background-radius: 8;
+    -fx-font-weight: 700;
+}
+
+.nav-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.10);
+}
+
+.nav-button-active {
+    -fx-background-color: #f2c14e;
+    -fx-text-fill: #173d36;
+}
+
+.top-bar {
+    -fx-background-color: #fbfaf6;
+    -fx-padding: 20 26;
+    -fx-border-color: transparent transparent #ded8cb transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.page-title {
+    -fx-text-fill: #1c2724;
+    -fx-font-size: 28px;
+    -fx-font-weight: 800;
+}
+
+.status-pill {
+    -fx-background-color: #e6eee8;
+    -fx-text-fill: #31564d;
+    -fx-padding: 7 12;
+    -fx-background-radius: 999;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+.content-host {
+    -fx-background-color: #f4f1ea;
+}
+
+.two-column {
+    -fx-alignment: top-left;
+}
+
+.panel {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #ded8cb;
+    -fx-border-width: 1;
+    -fx-padding: 22;
+    -fx-effect: dropshadow(gaussian, rgba(28, 39, 36, 0.10), 16, 0.18, 0, 6);
+}
+
+.panel-title {
+    -fx-text-fill: #1c2724;
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+}
+
+.panel-subtitle,
+.hint-label,
+.result-line {
+    -fx-text-fill: #66736d;
+}
+
+.form-grid {
+    -fx-hgap: 14;
+    -fx-vgap: 12;
+}
+
+.field-label {
+    -fx-text-fill: #33433f;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+}
+
+.text-field,
+.date-picker,
+.date-picker .text-field {
+    -fx-background-color: #fbfaf6;
+    -fx-background-radius: 7;
+    -fx-border-radius: 7;
+    -fx-border-color: #cfc7b8;
+    -fx-padding: 9 10;
+}
+
+.text-field:focused,
+.date-picker:focused,
+.date-picker .text-field:focused {
+    -fx-border-color: #397b67;
+}
+
+.segmented {
+    -fx-padding: 0;
+}
+
+.role-button {
+    -fx-background-color: #efe9dc;
+    -fx-text-fill: #33433f;
+    -fx-background-radius: 7;
+    -fx-padding: 10 16;
+    -fx-font-weight: 800;
+}
+
+.role-button:selected {
+    -fx-background-color: #397b67;
+    -fx-text-fill: white;
+}
+
+.primary-button,
+.secondary-button,
+.danger-button {
+    -fx-background-radius: 7;
+    -fx-padding: 10 16;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+}
+
+.primary-button {
+    -fx-background-color: #397b67;
+    -fx-text-fill: white;
+}
+
+.primary-button:hover {
+    -fx-background-color: #2f6656;
+}
+
+.secondary-button {
+    -fx-background-color: #efe9dc;
+    -fx-text-fill: #33433f;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #e1d8c8;
+}
+
+.danger-button {
+    -fx-background-color: #b7473f;
+    -fx-text-fill: white;
+}
+
+.danger-button:hover {
+    -fx-background-color: #9d3832;
+}
+
+.metrics-grid {
+    -fx-fill-width: true;
+}
+
+.metric-card {
+    -fx-background-color: #fbfaf6;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #e4ded2;
+    -fx-padding: 14;
+}
+
+.metric-value {
+    -fx-text-fill: #1c2724;
+    -fx-font-size: 22px;
+    -fx-font-weight: 900;
+}
+
+.metric-label {
+    -fx-text-fill: #66736d;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+}
+
+.shift-table {
+    -fx-background-color: white;
+    -fx-border-color: #ded8cb;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #efe9dc;
+}
+
+.table-view .column-header,
+.table-view .filler {
+    -fx-background-color: transparent;
+    -fx-size: 42;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #33433f;
+    -fx-font-weight: 900;
+}
+
+.detail-row {
+    -fx-background-color: #fbfaf6;
+    -fx-background-radius: 8;
+    -fx-padding: 14;
+}
+
+.detail-label {
+    -fx-text-fill: #1c2724;
+    -fx-font-weight: 900;
+    -fx-min-width: 120;
+}
+
+.detail-value {
+    -fx-text-fill: #66736d;
+}
